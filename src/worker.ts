@@ -21,12 +21,13 @@ import {
 	InteractionType,
 } from 'discord-api-types/v10';
 import globalCommands from './global-commands';
-import { sendDebugResponse } from './utils';
+import { sendDebugResponse, sendError } from './utils';
 
 export interface Env {
 	APP_ID: string;
 	PUBLIC_KEY: string;
 	TOKEN: string;
+	ERROR_CHANNEL_ID: string;
 	DATA: KVNamespace;
 	COMMANDS: KVNamespace;
 	DOCS: KVNamespace;
@@ -45,21 +46,19 @@ router.get('/', async (request: Request, env: Env, ctx: ExecutionContext) => {
 	return new Response(html, { headers: { 'Content-Type': 'text/html' } });
 });
 router.get('*', async (request: Request, env: Env, ctx: ExecutionContext) => {
-	try {
-		return getAssetFromKV(
-			{
-				request,
-				waitUntil: ctx.waitUntil.bind(ctx),
-			},
-			{
-				ASSET_NAMESPACE: env.DOCS,
-				ASSET_MANIFEST: ASSET_MANIFEST,
-			}
-		);
-	} catch (e) {
+	return getAssetFromKV(
+		{
+			request,
+			waitUntil: ctx.waitUntil.bind(ctx),
+		},
+		{
+			ASSET_NAMESPACE: env.DOCS,
+			ASSET_MANIFEST: ASSET_MANIFEST,
+		}
+	).catch((e) => {
 		const pathname = new URL(request.url).pathname;
 		return new Response(`${pathname} not found`, { status: 404, statusText: 'not found' });
-	}
+	});
 });
 
 router.post('/', async (request: Request, env: Env) => {
@@ -169,7 +168,12 @@ router.post('/', async (request: Request, env: Env) => {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		// env.DEBUG = true;
-		return await router.handle(request, env, ctx);
+		try {
+			return await router.handle(request, env, ctx);
+		} catch (e) {
+			ctx.waitUntil(sendError(env, e));
+			return new Response('Internal server error', { status: 500, statusText: 'Internal server error' });
+		}
 	},
 };
 

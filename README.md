@@ -26,7 +26,7 @@ krungor supports some special syntax to allow you to create command options and 
 
 there are some things you have to keep in mind when creating commands:
 - command names can not have spaces and only `-` and `_` are allowed as special characters
-- commands can be up to 32 characters long
+- command names can be up to 32 characters long
 - options are specified like this: `{option_name:Fancy description for cool option!}`
 - option names have the same limits as command names
 - each option must have a description (everything after the colon)
@@ -65,7 +65,7 @@ in krungor's settings, you can **click on a command** to change
 ![permission overrides](permission-overrides.png)
 
 ## feedback
-if you would like to send me feedback or suggestions, please join [krungor's support server](https://discord.gg/ThG7vZq3ZX).
+if you would like to send me feedback or suggestions, please join [krungor's support server](https://discord.gg/ThG7vZq3ZX) or create an issue on [GitHub](https://github.com/DaniDipp/krungor).
 
 ## terms of service
 by using krungor, you agree to the following terms of service:
@@ -76,18 +76,18 @@ by using krungor, you agree to the following terms of service:
 - you will not use krungor to make other people upset.
 
 ## privacy policy
-when you create a command, krungor collects and stores the following data:
+when you create a command, krungor **collects and stores** the following data:
 - the id if your server
 - the ids, names, and replys of your commands
-when a command is deleted, the data is deleted as well.
+when you delete a command, all data about it **is deleted** as well.
 
-when a command is used, krungor collects and processes the following data without storing it:
+when a command is used, krungor **collects and processes** the following data **without storing it**:
 - the id of your server
 - the id of the command used
 - the display name of the user who used the command
 - this list might be updated with more data in the future to support additional features
 
-krungor does not collect or store any other data.
+krungor does not collect or store any other data or usage logs.
 
 krungor uses Cloudflare Workers to host this website, and Cloudflare may collect additional data. you can read their privacy policy [here](https://www.cloudflare.com/privacypolicy/).
 

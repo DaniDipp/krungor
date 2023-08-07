@@ -56,7 +56,7 @@ export async function createCommand(
 	command: RESTPostAPIChatInputApplicationCommandsJSONBody,
 	response: string
 ): Promise<APIApplicationCommand> {
-	const discordCommmand = (await (
+	const discordCommand = (await (
 		await fetch(RouteBases.api + Routes.applicationGuildCommands(env.APP_ID, guildId), {
 			method: 'POST',
 			headers: {
@@ -66,9 +66,9 @@ export async function createCommand(
 			body: JSON.stringify(command),
 		})
 	).json()) as APIApplicationCommand;
-	await env.COMMANDS.put(`${guildId}-${discordCommmand.id}-${discordCommmand.name}`, response);
+	await env.COMMANDS.put(`${guildId}-${discordCommand.id}-${discordCommand.name}`, response);
 
-	return discordCommmand;
+	return discordCommand;
 }
 
 export async function editCommand(
@@ -79,17 +79,20 @@ export async function editCommand(
 ) {
 	const [guildId, commandId, commandName] = oldcommandKey.split('-');
 
-	await fetch(RouteBases.api + Routes.applicationGuildCommands(env.APP_ID, guildId) + `/${commandId}`, {
-		method: 'PATCH',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Bot ' + env.TOKEN,
-		},
-		body: JSON.stringify(command),
-	});
+	const discordCommand = (await (
+		await fetch(RouteBases.api + Routes.applicationGuildCommands(env.APP_ID, guildId) + `/${commandId}`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: 'Bot ' + env.TOKEN,
+			},
+			body: JSON.stringify(command),
+		})
+	).json()) as APIApplicationCommand;
 	const newCommandKey = `${guildId}-${commandId}-${command.name}`;
 	if (oldcommandKey !== newCommandKey) await env.COMMANDS.delete(oldcommandKey);
 	await env.COMMANDS.put(newCommandKey, response);
+	return;
 }
 
 export async function deleteCommand(env: Env, commandKey: `${string}-${string}-${string}`) {
@@ -146,4 +149,16 @@ export async function sendDebugResponse(env: Env, interaction: APIInteraction, r
 	console.log('<-', res.status);
 	const data = await res.json();
 	console.log('<-', JSON.stringify(data, null, 2));
+}
+
+export function sendError(env: Env, e: unknown) {
+	console.error(e);
+	return fetch(RouteBases.api + Routes.channelMessages(env.ERROR_CHANNEL_ID), {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: 'Bot ' + env.TOKEN,
+		},
+		body: JSON.stringify({ content: e instanceof Error ? `${e.name}: ${e.message}\n\`\`\`\n${e.stack}\n\`\`\`` : String(e) }),
+	});
 }
